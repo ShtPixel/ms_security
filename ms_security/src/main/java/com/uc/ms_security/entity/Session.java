@@ -1,0 +1,29 @@
+package com.uc.ms_security.entity;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "sessions")
+@Getter
+@Setter
+@NoArgsConstructor
+public class Session {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true, length = 500) // largo para soportar tokens tipo JWT
+    private String token;
+
+    @Column(nullable = false)
+    private LocalDateTime expiration; // fecha y hora exacta en que vence la sesión
+
+    @Column(name = "code_2fa", length = 6) // puede ser nulo: no todas las sesiones usan 2FA
+    private String code2FA;
+}

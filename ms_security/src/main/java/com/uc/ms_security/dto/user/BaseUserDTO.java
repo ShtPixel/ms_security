@@ -11,20 +11,20 @@ import lombok.Setter;
 @Setter
 public abstract class BaseUserDTO {
 
-    @NotBlank( //El nombre no debe quedar en blanco
+    @NotBlank(
             message = "El nombre es obligatorio"
     )
     @Size(
-            min = 2, //Rango minimo del nombre
-            max = 100, //Rango maximo del nombre
+            min = 2,
+            max = 100,
             message = "El nombre debe tener entre 2 y 100 caracteres"
     )
     private String name;
 
-    @NotBlank( //El correo no debe estar en blanco
+    @NotBlank(
             message = "El email es obligatorio"
     )
-    @Email( //El campo de email debe tener un formato valido
+    @Email(
             message = "El email no tiene un formato válido"
     )
     private String email;

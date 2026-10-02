@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CreateUserDTO
-        extends BaseUserDTO { //Heredamos de la clase "padre" BaseUserDTO para no repetir codigo
+        extends BaseUserDTO {
 
     @NotBlank(
             message = "La contraseña es obligatoria"

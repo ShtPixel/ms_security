@@ -7,8 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UpdateUserDTO
-        extends BaseUserDTO {
+public class UpdateUserDTO extends BaseUserDTO {
 
     @Size(  min = 8,
             message = "La contraseña debe tener mínimo 8 caracteres"

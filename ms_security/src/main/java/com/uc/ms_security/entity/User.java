@@ -1,30 +1,38 @@
 package com.uc.ms_security.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "users")
-@Getter
+@Entity //crea una tabla en la base de datos
+@Table(name = "users") //nombre de la tabla
+@Getter //pueden generar los getters y setters de forma automática
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor // no se define la clase sino que lombook se encarga de crearlo
 public class User {
 
-    @Id
+    @Id  //traduce el codigo a la base de datos
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
     )
-    private Long id;
+    private Long id;  //atributo de la clase equivalente a la columna de la tabla
 
     @Column(
             nullable = false,
             length = 100
     )
-    private String name;
+    private String name; // atributo de la clase equivalente a la columna de la tabla
 
-    @Column(
+    @Column(  //atributo de la clase equivalente a la columna de la tabla
             nullable = false,
             unique = true,
             length = 150
@@ -35,4 +43,13 @@ public class User {
             nullable = false
     )
     private String password;
+
+    @OneToOne(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private Profile profile;
 }
+
