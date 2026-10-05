@@ -1,6 +1,6 @@
 package com.uc.ms_security.dto.session;
 
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 public class UpdateSessionDTO extends BaseSessionDTO {
 
-    // Si no se envía, se conserva el código actual (igual que la contraseña en User)
-    @Pattern(regexp = "^[0-9]{6}$", message = "El código 2FA debe tener 6 dígitos")
+    @Size(min = 6, max = 10, message = "El código 2FA debe tener entre 6 y 10 caracteres")
     private String code2FA;
 }

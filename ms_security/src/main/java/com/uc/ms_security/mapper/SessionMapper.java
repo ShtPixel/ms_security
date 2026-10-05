@@ -22,17 +22,15 @@ public class SessionMapper {
     public void updateEntity(UpdateSessionDTO dto, Session session) {
         session.setToken(dto.getToken());
         session.setExpiration(dto.getExpiration());
-
-        if (dto.getCode2FA() != null) {
-            session.setCode2FA(dto.getCode2FA());
-        }
+        session.setCode2FA(dto.getCode2FA());
     }
 
     public SessionResponseDTO toResponseDTO(Session session) {
         return new SessionResponseDTO(
                 session.getId(),
                 session.getToken(),
-                session.getExpiration()
+                session.getExpiration(),
+                session.getCode2FA()
         );
     }
 

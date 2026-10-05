@@ -5,8 +5,9 @@ import lombok.Value;
 import java.time.LocalDateTime;
 
 @Value
-public class SessionResponseDTO { // no se devuelve el code2FA, por seguridad (como la contraseña)
+public class SessionResponseDTO {
     Long id;
     String token;
     LocalDateTime expiration;
+    String code2FA;
 }

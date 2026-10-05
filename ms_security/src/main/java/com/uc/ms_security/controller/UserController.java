@@ -17,6 +17,7 @@ import com.uc.ms_security.dto.user.CreateUserDTO;
 import com.uc.ms_security.dto.user.UpdateUserDTO;
 import com.uc.ms_security.dto.user.UserDetailResponseDTO;
 import com.uc.ms_security.dto.user.UserResponseDTO;
+import com.uc.ms_security.dto.user.UserSessionsResponseDTO;
 import com.uc.ms_security.service.UserService;
 
 import jakarta.validation.Valid;
@@ -48,6 +49,11 @@ public class UserController {
     @GetMapping("/{id}/detail")
     public UserDetailResponseDTO findById(@PathVariable Long id) {
         return userService.findByIdAndProfile(id);
+    }
+
+    @GetMapping("/{id}/detail-with-sessions")
+    public UserSessionsResponseDTO findByIdAndSessions(@PathVariable Long id) {
+        return userService.findByIdAndSessions(id);
     }
 
     @PutMapping("/{id}")

@@ -11,13 +11,22 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public abstract class BaseSessionDTO {
+public class BaseSessionDTO {
 
     @NotBlank(message = "El token es obligatorio")
-    @Size(max = 500, message = "El token no puede superar 500 caracteres")
     private String token;
 
     @NotNull(message = "La fecha de expiración es obligatoria")
-    @Future(message = "La fecha de expiración debe ser futura")
+    @Future(message = "La fecha de expiración debe estar en el futuro")
     private LocalDateTime expiration;
+
+    @Size(
+            min = 6,
+            max = 10,
+            message = "El código 2FA debe tener entre 6 y 10 caracteres"
+    )
+    private String code2FA;
 }
+
+
+
