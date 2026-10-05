@@ -41,8 +41,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public UserDetailResponseDTO findById(@PathVariable Long id) {
+    public UserResponseDTO findId(@PathVariable Long id) {
         return userService.findById(id);
+    }
+
+    @GetMapping("/{id}/detail")
+    public UserDetailResponseDTO findById(@PathVariable Long id) {
+        return userService.findByIdAndProfile(id);
     }
 
     @PutMapping("/{id}")
