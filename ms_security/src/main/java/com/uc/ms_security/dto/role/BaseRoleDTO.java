@@ -13,6 +13,7 @@ public abstract class BaseRoleDTO {
     @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres")
     private String name;
 
+    @NotBlank(message = "La descripción es obligatoria")
     @Size(max = 255, message = "La descripción no puede superar 255 caracteres")
     private String description;
 }

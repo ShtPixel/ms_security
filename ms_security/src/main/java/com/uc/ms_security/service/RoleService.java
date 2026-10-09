@@ -12,6 +12,7 @@ import com.uc.ms_security.exception.ApplicationException;
 import com.uc.ms_security.exception.ErrorCase;
 import com.uc.ms_security.mapper.RoleMapper;
 import com.uc.ms_security.repository.RoleRepository;
+import com.uc.ms_security.repository.UserRoleRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 public class RoleService {
 
     private final RoleRepository roleRepository;
+
+    private final UserRoleRepository userRoleRepository;
 
     private final RoleMapper roleMapper;
 
@@ -68,8 +71,12 @@ public class RoleService {
 
     public void delete(Long id) {
         Role role = findRole(id);
-        // Cuando exista UserRole, aquí va la validación INVALID_OPERATION
-        // (no eliminar un rol asignado), usando userRoleRepository.existsByRoleId(id)
+        if (userRoleRepository.existsByRoleId(id)) {
+            throw new ApplicationException(
+                    ErrorCase.INVALID_OPERATION,
+                    "No se puede eliminar un rol que está asignado"
+            );
+        }
         roleRepository.delete(role);
     }
 }
