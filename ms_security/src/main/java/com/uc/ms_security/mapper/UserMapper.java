@@ -2,6 +2,7 @@ package com.uc.ms_security.mapper;
 
 import java.util.List;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.uc.ms_security.dto.user.CreateUserDTO;
@@ -24,12 +25,14 @@ public class UserMapper {
 
     private final UserRoleMapper userRoleMapper;
 
+    private final PasswordEncoder passwordEncoder;
+
     public User toEntity(CreateUserDTO dto) {
         User user = new User();
 
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         return user;
     }
@@ -39,7 +42,7 @@ public class UserMapper {
         user.setEmail(dto.getEmail());
 
         if (dto.getPassword() != null) {
-            user.setPassword(dto.getPassword());
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
     }
 
