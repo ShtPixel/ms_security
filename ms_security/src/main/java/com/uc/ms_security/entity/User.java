@@ -48,6 +48,11 @@ public class User {
     )
     private String password;
 
+    @Column(
+            nullable = false
+    )
+    private boolean active = true; // true = activo, false = desactivado
+
     @OneToOne(
             mappedBy = "user",
             cascade = CascadeType.ALL,

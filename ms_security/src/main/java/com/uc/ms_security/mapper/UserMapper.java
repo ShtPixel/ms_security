@@ -50,7 +50,8 @@ public class UserMapper {
         return new UserResponseDTO(
                 user.getId(),
                 user.getName(),
-                user.getEmail()
+                user.getEmail(),
+                user.isActive()
         );
     }
 
@@ -59,6 +60,7 @@ public class UserMapper {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.isActive(),
                 profileMapper.toResponseDTO(user.getProfile())
         );
     }
@@ -68,6 +70,7 @@ public class UserMapper {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.isActive(),
                 sessionMapper.toResponseDTOList(user.getSessions())
         );
     }
@@ -77,6 +80,7 @@ public class UserMapper {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.isActive(),
                 userRoleMapper.toResponseDTOList(user.getUserRoles())
         );
     }
