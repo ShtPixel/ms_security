@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.uc.ms_security.dto.role.CreateRoleDTO;
+import com.uc.ms_security.dto.role.RolePermissionsResponseDTO;
 import com.uc.ms_security.dto.role.RoleResponseDTO;
 import com.uc.ms_security.dto.role.UpdateRoleDTO;
 import com.uc.ms_security.entity.Role;
@@ -54,6 +55,16 @@ public class RoleService {
     public RoleResponseDTO findById(Long id) {
         Role role = findRole(id);
         return roleMapper.toResponseDTO(role);
+    }
+
+    public RolePermissionsResponseDTO findByIdAndPermissions(Long id) {
+        Role role = roleRepository.findWithPermissionsById(id)
+                .orElseThrow(() -> new ApplicationException(
+                        ErrorCase.NOT_FOUND,
+                        "Rol no encontrado con id: " + id
+                ));
+
+        return roleMapper.toPermissionsResponseDTO(role);
     }
 
     public RoleResponseDTO update(Long id, UpdateRoleDTO dto) {
