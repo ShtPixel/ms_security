@@ -790,7 +790,13 @@ contraseña: Admin123!
 rol: ADMIN
 ~~~
 
-Inicia el proyecto con `./mvnw spring-boot:run` o ejecutando
+La contraseña inicial se puede cambiar con la propiedad
+`security.seed.admin-password` o la variable de entorno
+`SECURITY_SEED_ADMIN_PASSWORD`. `Admin123!` es únicamente para desarrollo:
+configura una contraseña propia antes de usar el seeder en otro entorno.
+
+Este repositorio utiliza Gradle. Inicia el proyecto con `.\gradlew.bat bootRun`
+en Windows o `./gradlew bootRun` en macOS/Linux, o ejecuta
 `MsSecurityApplication`. El seeder se ejecuta automáticamente después de que
 Spring crea el contexto.
 

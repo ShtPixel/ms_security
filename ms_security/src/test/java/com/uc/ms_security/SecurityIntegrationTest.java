@@ -2,6 +2,7 @@ package com.uc.ms_security;
 
 import com.uc.ms_security.entity.User;
 import com.uc.ms_security.service.JwtService;
+import com.uc.ms_security.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +24,9 @@ class SecurityIntegrationTest {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     void loginIsPublicAndReturnsGenericUnauthorizedForInvalidCredentials() throws Exception {
@@ -51,13 +55,24 @@ class SecurityIntegrationTest {
 
     @Test
     void protectedEndpointAcceptsValidBearerToken() throws Exception {
-        User user = new User();
-        user.setId(1L);
-        user.setEmail("ana@mail.com");
+        User user = userRepository.findByEmail("admin@uc.edu.co")
+                .orElseThrow();
         String token = jwtService.generateToken(user).accessToken();
 
         mockMvc.perform(get("/api/users")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void protectedEndpointRejectsValidTokenWithoutPermission() throws Exception {
+        User user = new User();
+        user.setId(Long.MAX_VALUE);
+        user.setEmail("sin-permisos@mail.com");
+        String token = jwtService.generateToken(user).accessToken();
+
+        mockMvc.perform(get("/api/users")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
     }
 }

@@ -11,8 +11,10 @@ import java.util.List;
 @Entity
 @Table(
         name = "permissions",
-        // no puede existir dos veces el mismo permiso (misma url + mismo método)
-        uniqueConstraints = @UniqueConstraint(columnNames = {"url", "method"})
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_permission_url_method",
+                columnNames = {"url", "method"}
+        )
 )
 @Getter
 @Setter

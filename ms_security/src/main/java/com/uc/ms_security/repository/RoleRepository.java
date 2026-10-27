@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface RoleRepository extends JpaRepository<Role, Long> {
 
+    Optional<Role> findByNameIgnoreCase(String name);
+
     // IgnoreCase: "ADMIN", "admin" y "Admin" se consideran el mismo rol
     boolean existsByNameIgnoreCase(String name);
 
