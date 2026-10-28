@@ -21,7 +21,7 @@ public class CreateUserDTO
             message = "La contraseña debe tener entre 8 y 72 caracteres"
     )
     @Pattern(
-            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])\\S{8,72}$",
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?#&])\\S{8,72}$",
             message = "La contraseña debe contener al menos una mayúscula, "
                     + "una minúscula, un número y un carácter especial, "
                     + "sin espacios"
