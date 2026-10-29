@@ -9,4 +9,5 @@ public class ProfileResponseDTO {
     Long id;
     String phone;
     LocalDate birthDate;
+    String photo;
 }
