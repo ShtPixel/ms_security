@@ -37,10 +37,12 @@ public class UserService {
         User savedUser = userRepository.save(user);
         return userMapper.toResponseDTO(savedUser);
     }
+
     public List<UserResponseDTO> findAll() {
         List<User> users =userRepository.findAll();
         return userMapper.toResponseDTOList(users);
     }
+    
     private User findUser(Long id) {
         return userRepository.findById(id)
             .orElseThrow(() -> new ApplicationException(
@@ -83,6 +85,11 @@ public class UserService {
                         "Usuario no encontrado con id: " + id
                 ));
         return userMapper.toRolesResponseDTO(user);
+    }
+
+    public List<UserResponseDTO> findUsersWithoutRoles() {
+        List<User> usersWithoutRoles = userRepository.findUsersWithoutRoles();
+        return userMapper.toResponseDTOList(usersWithoutRoles);
     }
 
     public UserResponseDTO update(Long id, UpdateUserDTO dto) {

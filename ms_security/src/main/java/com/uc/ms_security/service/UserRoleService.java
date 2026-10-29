@@ -32,6 +32,13 @@ public class UserRoleService {
 
     @Transactional
     public UserRoleResponseDTO assign(AssignRoleRequestDTO dto) {
+        if (userRepository.findById(dto.getUserId()).isEmpty() && roleRepository.findById(dto.getRoleId()).isEmpty()) {
+            throw new ApplicationException(
+                    ErrorCase.NOT_FOUND,
+                    "El usuario y el rol no se encontraron"
+            );
+        }
+
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new ApplicationException(
                         ErrorCase.NOT_FOUND,
