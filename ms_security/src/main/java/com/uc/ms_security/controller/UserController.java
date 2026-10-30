@@ -63,6 +63,11 @@ public class UserController {
         return userService.findByIdAndRoles(id);
     }
 
+    @GetMapping("/without-roles")
+    public List<UserResponseDTO> findUsersWithoutRoles() {
+        return userService.findUsersWithoutRoles();
+    }
+
     @PutMapping("/{id}")
     public UserResponseDTO update(
             @PathVariable Long id,

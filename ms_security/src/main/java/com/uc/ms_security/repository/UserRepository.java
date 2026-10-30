@@ -4,8 +4,10 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import com.uc.ms_security.entity.User;
+import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -23,4 +25,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @EntityGraph(attributePaths = {"userRoles", "userRoles.role"})
     Optional<User> findWithRolesById(Long id);
+
+    @Query("""
+        SELECT u
+        FROM User u
+        LEFT JOIN u.userRoles ur
+        WHERE ur IS NULL
+        """)
+    List<User> findUsersWithoutRoles();
 }
