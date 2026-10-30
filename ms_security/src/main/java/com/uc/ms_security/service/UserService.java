@@ -108,4 +108,18 @@ public class UserService {
         User user = findUser(id);
         userRepository.delete(user);
     }
+
+    public UserResponseDTO deactivate(Long id) {
+        User user = findUser(id);
+        user.setActive(false);
+        User updatedUser = userRepository.save(user);
+        return userMapper.toResponseDTO(updatedUser);
+    }
+
+    public UserResponseDTO activate(Long id) {
+        User user = findUser(id);
+        user.setActive(true);
+        User updatedUser = userRepository.save(user);
+        return userMapper.toResponseDTO(updatedUser);
+    }
 }

@@ -47,6 +47,12 @@ public class ProfileService {
                     "El usuario ya tiene un perfil"
             );
         }
+        if (profileRepository.existsByPhone(dto.getPhone())) {
+            throw new ApplicationException(
+                    ErrorCase.ALREADY_EXISTS,
+                    "Ya existe un perfil con este teléfono"
+            );
+        }
 
         Profile profile = profileMapper.toEntity(dto);
         profile.setUser(user);
@@ -87,6 +93,12 @@ public class ProfileService {
 
     public ProfileResponseDTO updateByUserId(Long userId, UpdateProfileDTO dto) {
         Profile profile = findProfileByUserId(userId);
+        if (profileRepository.existsByPhoneAndIdNot(dto.getPhone(), profile.getId())) {
+            throw new ApplicationException(
+                    ErrorCase.ALREADY_EXISTS,
+                    "El teléfono pertenece a otro perfil"
+            );
+        }
         profileMapper.updateEntity(dto, profile);
         Profile updatedProfile = profileRepository.save(profile);
         return profileMapper.toResponseDTO(updatedProfile);
