@@ -2,6 +2,7 @@ package com.uc.ms_security.mapper;
 
 import java.util.List;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.uc.ms_security.dto.user.CreateUserDTO;
@@ -43,7 +44,8 @@ public class UserMapper {
         return new UserResponseDTO(
                 user.getId(),
                 user.getName(),
-                user.getEmail()
+                user.getEmail(),
+                user.isActive()
         );
     }
 
@@ -52,6 +54,7 @@ public class UserMapper {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.isActive(),
                 profileMapper.toResponseDTO(user.getProfile())
         );
     }
@@ -61,6 +64,7 @@ public class UserMapper {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.isActive(),
                 sessionMapper.toResponseDTOList(user.getSessions())
         );
     }
@@ -70,6 +74,7 @@ public class UserMapper {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.isActive(),
                 userRoleMapper.toResponseDTOList(user.getUserRoles())
         );
     }

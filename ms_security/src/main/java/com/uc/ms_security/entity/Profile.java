@@ -32,6 +32,9 @@ public class Profile {
     @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate; // solo fecha, sin hora (ej: 2004-05-20)
 
+    @Column(name = "photo", length = 500)
+    private String photo;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
