@@ -10,5 +10,6 @@ public class UserSessionsResponseDTO {
     Long id;
     String name;
     String email;
+    boolean active;
     List<SessionResponseDTO> sessions;
 }

@@ -1,0 +1,814 @@
+{
+  "info": {
+    "_postman_id": "d6307d76-5eb5-4db4-b877-e375f47f3eb4",
+    "name": "Módulo de Seguridad - HU-SE-01 a HU-SE-10",
+    "description": "Colección construida a partir de Anexo_1_Módulo Seguridad.docx y contrastada con los controladores y DTO existentes. Cada solicitud indica si la ruta está IMPLEMENTADA o PROPUESTA (pendiente de implementar o incompleta). Las rutas PROPUESTAS son contratos sugeridos para satisfacer las historias, no endpoints que se afirme que ya existen. Base local: http://localhost:8181. Las operaciones administrativas requieren un accessToken con permisos. Las historias HU-SE-08 y HU-SE-10 requieren que la API persista y revoque sesiones/token; actualmente el login implementado devuelve JWT y no hay rutas de OAuth, recuperación, 2FA ni cierre de sesión.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8181",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "challengeToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "roleId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "permissionId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "sessionId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "resetToken",
+      "value": "REEMPLAZAR_POR_TOKEN_RECIBIDO",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "HU-SE-01 - Gestionar usuarios",
+      "description": "Alta, consulta, actualización y eliminación de usuarios. El borrado implementado es físico; la desactivación conservando los datos y las asignaciones no está implementada.",
+      "item": [
+        {
+          "name": "Crear usuario (administración) [IMPLEMENTADA]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Pérez\",\n  \"email\": \"ana.perez@example.com\",\n  \"password\": \"Segura123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users",
+            "description": "POST /api/users. Ruta implementada. Requiere autorización actualmente. La contraseña debe tener 8-72 caracteres, mayúscula, minúscula, número y carácter especial. El servicio verifica que el email no exista y codifica la contraseña."
+          }
+        },
+        {
+          "name": "Listar usuarios [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users",
+            "description": "GET /api/users. Retorna los usuarios registrados."
+          }
+        },
+        {
+          "name": "Consultar usuario [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/{{userId}}",
+            "description": "GET /api/users/{id}."
+          }
+        },
+        {
+          "name": "Consultar detalle y perfil de usuario [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/{{userId}}/detail",
+            "description": "GET /api/users/{id}/detail."
+          }
+        },
+        {
+          "name": "Consultar roles del usuario [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/{{userId}}/detail-with-roles",
+            "description": "GET /api/users/{id}/detail-with-roles. Permite navegar desde el usuario a sus roles."
+          }
+        },
+        {
+          "name": "Consultar sesiones del usuario [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/{{userId}}/detail-with-sessions",
+            "description": "GET /api/users/{id}/detail-with-sessions. La respuesta actual incluye datos de sesión; trata el token como información sensible."
+          }
+        },
+        {
+          "name": "Actualizar usuario [IMPLEMENTADA]",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Pérez actualizada\",\n  \"email\": \"ana.perez@example.com\",\n  \"password\": \"NuevaSegura123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/{{userId}}",
+            "description": "PUT /api/users/{id}. La contraseña es opcional; al enviarla, debe cumplir las reglas de seguridad."
+          }
+        },
+        {
+          "name": "Eliminar usuario [IMPLEMENTADA - borrado físico]",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/users/{{userId}}",
+            "description": "DELETE /api/users/{id}. El servicio actual elimina el usuario; no implementa desactivación. Verificar reglas de integridad/retención antes de usarlo."
+          }
+        },
+        {
+          "name": "Desactivar usuario conservando roles y permisos [PROPUESTA]",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": false\n}"
+            },
+            "url": "{{baseUrl}}/api/users/{{userId}}/status",
+            "description": "Ruta sugerida para cumplir la alternativa de desactivar sin borrar el usuario ni sus asociaciones. No implementada."
+          }
+        }
+      ]
+    },
+    {
+      "name": "HU-SE-02 - Gestionar perfil",
+      "description": "Un perfil por usuario. El contrato actual almacena teléfono y fecha de nacimiento; la fotografía requiere implementación adicional.",
+      "item": [
+        {
+          "name": "Crear perfil [IMPLEMENTADA]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"3001234567\",\n  \"birthDate\": \"1995-06-15\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/{{userId}}/profile",
+            "description": "POST /api/users/{userId}/profile. Requiere usuario existente; teléfono de 7-15 dígitos y fecha pasada."
+          }
+        },
+        {
+          "name": "Consultar perfil [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/{{userId}}/profile",
+            "description": "GET /api/users/{userId}/profile."
+          }
+        },
+        {
+          "name": "Actualizar perfil [IMPLEMENTADA]",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"3007654321\",\n  \"birthDate\": \"1995-06-15\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/{{userId}}/profile",
+            "description": "PUT /api/users/{userId}/profile. Actualiza datos del perfil, no credenciales."
+          }
+        },
+        {
+          "name": "Cargar o reemplazar fotografía [PROPUESTA]",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/users/{{userId}}/profile/photo",
+            "description": "POST /api/users/{userId}/profile/photo. Ruta sugerida; elegir el archivo en Postman. No implementada en entidad ni DTO actuales."
+          }
+        },
+        {
+          "name": "Eliminar perfil [IMPLEMENTADA]",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/users/{{userId}}/profile",
+            "description": "DELETE /api/users/{userId}/profile."
+          }
+        }
+      ]
+    },
+    {
+      "name": "HU-SE-03 - Gestionar roles",
+      "item": [
+        {
+          "name": "Crear rol [IMPLEMENTADA]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"GESTOR_COMPETENCIAS\",\n  \"description\": \"Administra competencias y resultados\"\n}"
+            },
+            "url": "{{baseUrl}}/api/roles",
+            "description": "POST /api/roles. La unicidad del nombre debe comprobarse en el servicio/base de datos."
+          }
+        },
+        {
+          "name": "Listar roles [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/roles"
+          }
+        },
+        {
+          "name": "Consultar rol [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/roles/{{roleId}}"
+          }
+        },
+        {
+          "name": "Consultar rol con permisos [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/roles/{{roleId}}/detail-with-permissions",
+            "description": "GET /api/roles/{id}/detail-with-permissions. Punto de entrada para consultar los permisos actuales del rol."
+          }
+        },
+        {
+          "name": "Actualizar rol [IMPLEMENTADA]",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"GESTOR_COMPETENCIAS\",\n  \"description\": \"Administra competencias y resultados deportivos\"\n}"
+            },
+            "url": "{{baseUrl}}/api/roles/{{roleId}}"
+          }
+        },
+        {
+          "name": "Eliminar rol [IMPLEMENTADA - validar dependencias]",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/roles/{{roleId}}",
+            "description": "DELETE /api/roles/{id}. La validación de si está asignado a usuarios debe estar implementada antes de permitir el borrado."
+          }
+        }
+      ]
+    },
+    {
+      "name": "HU-SE-04 - Asignar roles a usuarios",
+      "item": [
+        {
+          "name": "Consultar usuarios asignados a un rol [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/user-roles/roles/{{roleId}}"
+          }
+        },
+        {
+          "name": "Consultar roles asignados a un usuario [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/user-roles/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Consultar usuarios disponibles para el rol [PROPUESTA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/roles/{{roleId}}/users/available",
+            "description": "Ruta sugerida para mostrar usuarios aún no asignados y evitar duplicar asignaciones. No implementada."
+          }
+        },
+        {
+          "name": "Asignar rol a usuario [IMPLEMENTADA]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"roleId\": \"{{roleId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/user-roles",
+            "description": "POST /api/user-roles. Usuario y rol deben existir; no se permite repetir la misma pareja."
+          }
+        },
+        {
+          "name": "Retirar rol de usuario [IMPLEMENTADA]",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/user-roles/{{userId}}/{{roleId}}",
+            "description": "DELETE /api/user-roles/{userId}/{roleId}. Solo elimina la asociación, no al usuario ni al rol. El diálogo de confirmación corresponde al cliente."
+          }
+        }
+      ]
+    },
+    {
+      "name": "HU-SE-05 - Gestionar permisos",
+      "item": [
+        {
+          "name": "Crear permiso [IMPLEMENTADA]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"/api/competitions/**\",\n  \"method\": \"GET\",\n  \"model\": \"Competition\"\n}"
+            },
+            "url": "{{baseUrl}}/api/permissions",
+            "description": "POST /api/permissions. Campos actuales: url (debe iniciar con /), method (GET, POST, PUT, PATCH o DELETE) y model. Recurso y operación se expresan con model + método + URL."
+          }
+        },
+        {
+          "name": "Listar permisos [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/permissions"
+          }
+        },
+        {
+          "name": "Consultar permiso [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/permissions/{{permissionId}}"
+          }
+        },
+        {
+          "name": "Actualizar permiso [IMPLEMENTADA]",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"/api/competitions/**\",\n  \"method\": \"POST\",\n  \"model\": \"Competition\"\n}"
+            },
+            "url": "{{baseUrl}}/api/permissions/{{permissionId}}"
+          }
+        },
+        {
+          "name": "Eliminar permiso [IMPLEMENTADA - validar asociaciones]",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/permissions/{{permissionId}}",
+            "description": "DELETE /api/permissions/{id}. Validar las reglas de asociación antes de borrar; eliminar un permiso no debe eliminar roles."
+          }
+        }
+      ]
+    },
+    {
+      "name": "HU-SE-06 - Asignar permisos y consultar matriz",
+      "item": [
+        {
+          "name": "Consultar permisos asignados a rol [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/role-permissions/roles/{{roleId}}",
+            "description": "GET /api/role-permissions/roles/{roleId}. Lista las asociaciones actuales."
+          }
+        },
+        {
+          "name": "Consultar matriz agrupada de permisos [PROPUESTA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/roles/{{roleId}}/permissions/matrix",
+            "description": "Ruta sugerida para obtener permisos agrupados por model/recurso y marcar únicamente las asignaciones existentes. No implementada."
+          }
+        },
+        {
+          "name": "Guardar matriz completa del rol [PROPUESTA]",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permissionIds\": [1, 2, 5]\n}"
+            },
+            "url": "{{baseUrl}}/api/roles/{{roleId}}/permissions",
+            "description": "Ruta sugerida para reemplazar atómicamente el conjunto de permisos del rol al guardar la matriz. Validar IDs, eliminar solo asociaciones desmarcadas y mantener intactos los permisos. No implementada."
+          }
+        },
+        {
+          "name": "Asignar un permiso a un rol [IMPLEMENTADA]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleId\": \"{{roleId}}\",\n  \"permissionId\": \"{{permissionId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/role-permissions",
+            "description": "POST /api/role-permissions. Deben existir rol y permiso; no se permite duplicar la asociación."
+          }
+        },
+        {
+          "name": "Retirar un permiso de un rol [IMPLEMENTADA]",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/role-permissions/{{roleId}}/{{permissionId}}",
+            "description": "DELETE /api/role-permissions/{roleId}/{permissionId}. Elimina la asociación, no el permiso global."
+          }
+        },
+        {
+          "name": "Consultar roles que usan un permiso [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/role-permissions/permissions/{{permissionId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "HU-SE-07 - Registro mediante credenciales",
+      "item": [
+        {
+          "name": "Registrar cuenta públicamente [PROPUESTA]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const data = pm.response.json(); if (data.id) pm.collectionVariables.set('userId', data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nuevo Usuario\",\n  \"email\": \"nuevo.usuario@example.com\",\n  \"password\": \"Segura123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register",
+            "description": "Ruta pública propuesta (no implementada). La ruta existente POST /api/users crea usuarios administrativamente y hoy está protegida por autorización; no satisface por sí sola el registro público. Esperado: validar datos, email único, codificar contraseña y devolver usuario sin credenciales."
+          }
+        }
+      ]
+    },
+    {
+      "name": "HU-SE-08 - Autenticarse y gestionar sesión",
+      "description": "Login de contraseña implementado. OAuth y cierre de sesión con revocación aún no están disponibles en los controladores.",
+      "item": [
+        {
+          "name": "Iniciar sesión con email y contraseña [IMPLEMENTADA]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const data = pm.response.json(); if (data.accessToken) pm.collectionVariables.set('accessToken', data.accessToken); if (data.challengeToken) pm.collectionVariables.set('challengeToken', data.challengeToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana.perez@example.com\",\n  \"password\": \"Segura123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "POST /api/auth/login. Implementado; retorna accessToken, tokenType y expiresAt. El login actual no realiza 2FA, comprueba estado habilitado ni crea una sesión persistida."
+          }
+        },
+        {
+          "name": "Intercambiar código OAuth con Google [PROPUESTA]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const data = pm.response.json(); if (data.accessToken) pm.collectionVariables.set('accessToken', data.accessToken); if (data.user && data.user.id) pm.collectionVariables.set('userId', data.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CODIGO_AUTORIZACION_DEVUELTO_POR_GOOGLE\",\n  \"redirectUri\": \"http://localhost:3000/auth/callback/google\",\n  \"codeVerifier\": \"VERIFICADOR_PKCE\",\n  \"state\": \"STATE_VALIDADO_POR_EL_CLIENTE\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/oauth/google",
+            "description": "Contrato sugerido: el backend intercambia/verifica el código con Google, identifica o crea al usuario OAuth y emite una sesión interna. No enviar client secret desde Postman ni desde un cliente público. No implementado."
+          }
+        },
+        {
+          "name": "Intercambiar código OAuth con GitHub [PROPUESTA]",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CODIGO_AUTORIZACION_DEVUELTO_POR_GITHUB\",\n  \"redirectUri\": \"http://localhost:3000/auth/callback/github\",\n  \"codeVerifier\": \"VERIFICADOR_PKCE\",\n  \"state\": \"STATE_VALIDADO_POR_EL_CLIENTE\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/oauth/github",
+            "description": "Contrato sugerido para GitHub. Aplicar las mismas reglas de vinculación de proveedor/email y evitar usuarios duplicados. No implementado."
+          }
+        },
+        {
+          "name": "Intercambiar código OAuth con Microsoft [PROPUESTA]",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CODIGO_AUTORIZACION_DEVUELTO_POR_MICROSOFT\",\n  \"redirectUri\": \"http://localhost:3000/auth/callback/microsoft\",\n  \"codeVerifier\": \"VERIFICADOR_PKCE\",\n  \"state\": \"STATE_VALIDADO_POR_EL_CLIENTE\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/oauth/microsoft",
+            "description": "Contrato sugerido para Microsoft, como proveedor adicional indicado por las historias. No implementado."
+          }
+        },
+        {
+          "name": "Listar sesiones del usuario [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/{{userId}}/sessions",
+            "description": "GET /api/users/{userId}/sessions. CRUD administrativo existente; las historias requieren vincular la sesión creada por autenticación con su usuario."
+          }
+        },
+        {
+          "name": "Consultar sesión [IMPLEMENTADA]",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/{{userId}}/sessions/{{sessionId}}"
+          }
+        },
+        {
+          "name": "Revocar sesión del usuario [IMPLEMENTADA]",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/users/{{userId}}/sessions/{{sessionId}}",
+            "description": "DELETE /api/users/{userId}/sessions/{sessionId}. Borra la sesión persistida. Confirmar que la validación del JWT consulte/revoque esa sesión: actualmente el token es JWT stateless."
+          }
+        },
+        {
+          "name": "Cerrar mi sesión e invalidar token [PROPUESTA]",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/logout",
+            "description": "Ruta sugerida, protegida con bearer token. Debe invalidar la sesión/token en servidor y permitir un inicio posterior. No implementada; borrar un registro no invalida por sí solo un JWT stateless."
+          }
+        }
+      ]
+    },
+    {
+      "name": "HU-SE-09 - Recuperar contraseña",
+      "item": [
+        {
+          "name": "Solicitar recuperación [PROPUESTA]",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana.perez@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/password/forgot",
+            "description": "Ruta pública sugerida. Generar token temporal de un solo uso solo para usuarios de autenticación local; responder sin revelar si el email está registrado. No implementada."
+          }
+        },
+        {
+          "name": "Establecer contraseña con token de recuperación [PROPUESTA]",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"newPassword\": \"NuevaSegura123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/password/reset",
+            "description": "Ruta pública sugerida. Rechazar token expirado o reutilizado; validar reglas de contraseña y considerar revocar sesiones existentes. No implementada."
+          }
+        }
+      ]
+    },
+    {
+      "name": "HU-SE-10 - Gestionar autenticación de dos factores",
+      "item": [
+        {
+          "name": "Habilitar o deshabilitar 2FA [PROPUESTA]",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/users/me/2fa",
+            "description": "Ruta sugerida y autenticada. Solo habilitar para autenticación local; OAuth debe excluirse. Implementar validación/confirmación de configuración según la política del sistema. No implementada."
+          }
+        },
+        {
+          "name": "Validar código 2FA y completar login [PROPUESTA]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const data = pm.response.json(); if (data.accessToken) pm.collectionVariables.set('accessToken', data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"challengeToken\": \"{{challengeToken}}\",\n  \"code\": \"123456\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/2fa/verify",
+            "description": "Ruta pública sugerida para el reto emitido tras validar contraseña. El código debe expirar, ser de un solo uso y estar asociado al reto; emitir sesión/token solo al validarlo. No implementada."
+          }
+        },
+        {
+          "name": "Cancelar reto 2FA [PROPUESTA]",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"challengeToken\": \"{{challengeToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/2fa/cancel",
+            "description": "Ruta sugerida para invalidar el reto pendiente sin crear sesión. No implementada."
+          }
+        }
+      ]
+    }
+  ]
+}

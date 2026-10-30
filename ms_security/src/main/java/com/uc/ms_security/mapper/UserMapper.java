@@ -2,6 +2,7 @@ package com.uc.ms_security.mapper;
 
 import java.util.List;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.uc.ms_security.dto.user.CreateUserDTO;
@@ -24,30 +25,27 @@ public class UserMapper {
 
     private final UserRoleMapper userRoleMapper;
 
-    public User toEntity(CreateUserDTO dto) {
+    public User toEntity(CreateUserDTO dto, String encodedPassword) {
         User user = new User();
 
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
+        user.setPassword(encodedPassword);
 
         return user;
     }
 
-    public void updateEntity(UpdateUserDTO dto, User user) {
+    public void updateBasicData(UpdateUserDTO dto, User user) {
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
-
-        if (dto.getPassword() != null) {
-            user.setPassword(dto.getPassword());
-        }
     }
 
     public UserResponseDTO toResponseDTO(User user) {
         return new UserResponseDTO(
                 user.getId(),
                 user.getName(),
-                user.getEmail()
+                user.getEmail(),
+                user.isActive()
         );
     }
 
@@ -56,6 +54,7 @@ public class UserMapper {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.isActive(),
                 profileMapper.toResponseDTO(user.getProfile())
         );
     }
@@ -65,6 +64,7 @@ public class UserMapper {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.isActive(),
                 sessionMapper.toResponseDTOList(user.getSessions())
         );
     }
@@ -74,6 +74,7 @@ public class UserMapper {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.isActive(),
                 userRoleMapper.toResponseDTOList(user.getUserRoles())
         );
     }

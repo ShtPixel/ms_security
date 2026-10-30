@@ -9,5 +9,6 @@ public class UserDetailResponseDTO {
     Long id;
     String name;
     String email;
+    boolean active;
     ProfileResponseDTO profile;
 }

@@ -44,9 +44,15 @@ public class User {
     private String email;
 
     @Column(
-            nullable = false
+            nullable = false,
+            length = 255
     )
     private String password;
+
+    @Column(
+            nullable = false
+    )
+    private boolean active = true; // true = activo, false = desactivado
 
     @OneToOne(
             mappedBy = "user",
@@ -72,4 +78,3 @@ public class User {
     )
     private List<UserRole> userRoles = new ArrayList<>();
 }
-
