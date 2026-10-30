@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.uc.ms_security.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.uc.ms_security.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.uc.ms_security.test.iml" filepath="$PROJECT_DIR$/.idea/modules/com.uc.ms_security.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/ms_security.iml" filepath="$PROJECT_DIR$/.idea/ms_security.iml" />
     </modules>
   </component>

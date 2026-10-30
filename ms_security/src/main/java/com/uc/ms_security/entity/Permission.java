@@ -5,11 +5,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(
         name = "permissions",
-        // no puede existir dos veces el mismo permiso (misma url + mismo método)
-        uniqueConstraints = @UniqueConstraint(columnNames = {"url", "method"})
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_permission_url_method",
+                columnNames = {"url", "method"}
+        )
 )
 @Getter
 @Setter
@@ -28,4 +33,10 @@ public class Permission {
 
     @Column(nullable = false, length = 100)
     private String model;   // ej: User, Role
+
+    @OneToMany(
+            mappedBy = "permission",
+            fetch = FetchType.LAZY
+    )
+    private List<RolePermission> rolePermissions = new ArrayList<>();
 }
