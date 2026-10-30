@@ -44,7 +44,8 @@ public class User {
     private String email;
 
     @Column(
-            nullable = false
+            nullable = false,
+            length = 255
     )
     private String password;
 
@@ -72,4 +73,3 @@ public class User {
     )
     private List<UserRole> userRoles = new ArrayList<>();
 }
-
