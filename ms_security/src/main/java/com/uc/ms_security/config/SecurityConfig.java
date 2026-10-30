@@ -35,6 +35,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/register").permitAll()
                         .anyRequest().access(dynamicAuthorizationManager)
                 )
                 .oauth2ResourceServer(resourceServer ->
