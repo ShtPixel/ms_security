@@ -25,6 +25,10 @@ public class AuthService {
     public AuthResponseDTO login(LoginRequestDTO dto) {
         User user = userRepository.findByEmail(dto.getEmail()).orElseThrow(this::unauthorized);
 
+        if (!user.isActive()) {
+            throw unauthorized();
+        }
+
         boolean validPassword = passwordEncoder.matches(dto.getPassword(),user.getPassword());
 
         if (!validPassword) {
