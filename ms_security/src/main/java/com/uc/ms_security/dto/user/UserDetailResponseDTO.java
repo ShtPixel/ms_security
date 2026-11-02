@@ -10,5 +10,6 @@ public class UserDetailResponseDTO {
     String name;
     String email;
     boolean active;
+    boolean twoFA;
     ProfileResponseDTO profile;
 }

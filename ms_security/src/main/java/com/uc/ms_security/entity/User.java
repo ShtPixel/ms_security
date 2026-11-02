@@ -54,6 +54,13 @@ public class User {
     )
     private boolean active = true; // true = activo, false = desactivado
 
+    @Column(
+            name = "two_fa_enabled",
+            nullable = false,
+            columnDefinition = "boolean not null default false"
+    )
+    private boolean twoFA = false;
+
     @OneToOne(
             mappedBy = "user",
             cascade = CascadeType.ALL,

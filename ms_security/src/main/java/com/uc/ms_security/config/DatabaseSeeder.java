@@ -117,14 +117,17 @@ public class DatabaseSeeder {
     }
 
     private User findOrCreateUser() {
-        return userRepository.findByEmail("admin@uc.edu.co")
+        User adminUser = userRepository.findByEmail("admin@uc.edu.co")
                 .orElseGet(() -> {
                     User user = new User();
                     user.setName("Administrador");
                     user.setEmail("admin@uc.edu.co");
                     user.setPassword(passwordEncoder.encode(adminPassword));
-                    return userRepository.save(user);
+                    return user;
                 });
+
+        adminUser.setTwoFA(true);
+        return userRepository.save(adminUser);
     }
 
     private Permission findOrCreatePermission(PermissionSeed seed) {

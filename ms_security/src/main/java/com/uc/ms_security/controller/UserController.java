@@ -90,4 +90,14 @@ public class UserController {
     public UserResponseDTO activate(@PathVariable Long id) {
         return userService.activate(id);
     }
+
+    @PatchMapping("/{id}/2fa/activate")
+    public UserResponseDTO enableTwoFA(@PathVariable Long id) {
+        return userService.enableTwoFA(id);
+    }
+
+    @PatchMapping("/{id}/2fa/desactivate")
+    public UserResponseDTO disableTwoFA(@PathVariable Long id) {
+        return userService.disableTwoFA(id);
+    }
 }
