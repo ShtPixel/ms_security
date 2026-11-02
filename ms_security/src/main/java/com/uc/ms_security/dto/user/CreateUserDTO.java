@@ -27,4 +27,6 @@ public class CreateUserDTO
                     + "sin espacios"
     )
     private String password;
+
+    private boolean twoFA;
 }

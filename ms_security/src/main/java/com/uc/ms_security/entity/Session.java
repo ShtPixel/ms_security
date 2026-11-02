@@ -24,8 +24,11 @@ public class Session {
     @Column(nullable = false)
     private LocalDateTime expiration; // fecha y hora exacta en que vence la sesión
 
-    @Column(name = "code_2fa", length = 10) // puede ser nulo: no todas las sesiones usan 2FA
+    @Column(name = "code_2fa", length = 60)
     private String code2FA;
+
+    @Column(nullable = false, columnDefinition = "boolean not null default true")
+    private boolean authenticated = true;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
