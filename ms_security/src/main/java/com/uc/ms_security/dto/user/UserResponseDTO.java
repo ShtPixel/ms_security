@@ -8,4 +8,5 @@ public class UserResponseDTO {
     String name;
     String email;
     boolean active;
+    boolean twoFA;
 }

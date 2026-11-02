@@ -11,5 +11,6 @@ public class UserSessionsResponseDTO {
     String name;
     String email;
     boolean active;
+    boolean twoFA;
     List<SessionResponseDTO> sessions;
 }

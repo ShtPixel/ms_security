@@ -128,4 +128,16 @@ public class UserService {
         User updatedUser = userRepository.save(user);
         return userMapper.toResponseDTO(updatedUser);
     }
+
+    public UserResponseDTO enableTwoFA(Long id) {
+        User user = findUser(id);
+        user.setTwoFA(true);
+        return userMapper.toResponseDTO(userRepository.save(user));
+    }
+
+    public UserResponseDTO disableTwoFA(Long id) {
+        User user = findUser(id);
+        user.setTwoFA(false);
+        return userMapper.toResponseDTO(userRepository.save(user));
+    }
 }
