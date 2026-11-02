@@ -2,6 +2,8 @@ package com.uc.ms_security.controller;
 
 import com.uc.ms_security.dto.AuthResponseDTO;
 import com.uc.ms_security.dto.LoginRequestDTO;
+import com.uc.ms_security.dto.RegisterRequestDTO;
+import com.uc.ms_security.dto.RegisterResponseDTO;
 import com.uc.ms_security.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,5 +23,11 @@ public class AuthController {
     public AuthResponseDTO login(
             @Valid @RequestBody LoginRequestDTO dto) {
         return authService.login(dto);
+    }
+
+    @PostMapping("/register")
+    public RegisterResponseDTO register(
+            @Valid @RequestBody RegisterRequestDTO dto) {
+        return authService.register(dto);
     }
 }
