@@ -16,5 +16,7 @@ public class UserRolesResponseDTO {
 
     boolean active;
 
+    boolean twoFA;
+
     List<UserRoleResponseDTO> roles;
 }

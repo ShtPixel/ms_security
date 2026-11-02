@@ -1,8 +1,11 @@
 package com.uc.ms_security.service;
 
-import com.uc.ms_security.dto.AuthResponseDTO;
+import com.uc.ms_security.dto.auth.AuthResponseDTO;
+import com.uc.ms_security.entity.Session;
 import com.uc.ms_security.entity.User;
+import com.uc.ms_security.repository.SessionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -13,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
@@ -24,7 +29,11 @@ public class JwtService {
 
     private final JwtEncoder jwtEncoder;
 
-    public AuthResponseDTO generateToken(User user) {
+    private final SessionRepository sessionRepository;
+
+    @Transactional
+    public AuthResponseDTO generateToken(Session session) {
+        User user = session.getUser();
         Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         Instant expiresAt = now.plus(TOKEN_DURATION);
 
@@ -41,6 +50,13 @@ public class JwtService {
         Jwt jwt = jwtEncoder.encode(
                 JwtEncoderParameters.from(header, claims)
         );
+
+        session.setToken(jwt.getTokenValue());
+        session.setExpiration(LocalDateTime.ofInstant(expiresAt, ZoneOffset.UTC));
+        session.setUser(user);
+        session.setCode2FA(null);
+        session.setAuthenticated(true);
+        sessionRepository.save(session);
 
         return new AuthResponseDTO(jwt.getTokenValue(), "Bearer", expiresAt);
     }

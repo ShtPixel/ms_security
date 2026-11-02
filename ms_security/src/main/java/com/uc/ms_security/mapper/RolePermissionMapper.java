@@ -1,6 +1,5 @@
 package com.uc.ms_security.mapper;
 
-import com.uc.ms_security.dto.permission.PermissionResponseDTO;
 import com.uc.ms_security.dto.role.RoleResponseDTO;
 import com.uc.ms_security.dto.rolepermission.PermissionRoleResponseDTO;
 import com.uc.ms_security.dto.rolepermission.RolePermissionResponseDTO;

@@ -1,18 +1,23 @@
 package com.uc.ms_security.controller;
 
-import com.uc.ms_security.dto.AuthResponseDTO;
-import com.uc.ms_security.dto.LoginRequestDTO;
-import com.uc.ms_security.dto.RegisterRequestDTO;
-import com.uc.ms_security.dto.RegisterResponseDTO;
-import com.uc.ms_security.dto.TwoFactorSettingsRequestDTO;
-import com.uc.ms_security.dto.TwoFactorVerifyRequestDTO;
+import com.uc.ms_security.dto.auth.AuthResponseDTO;
+import com.uc.ms_security.dto.auth.LoginRequestDTO;
+import com.uc.ms_security.dto.auth.LoginResultDTO;
+import com.uc.ms_security.dto.auth.RegisterRequestDTO;
+import com.uc.ms_security.dto.auth.RegisterResponseDTO;
+import com.uc.ms_security.dto.auth.VerifyTwoFactorRequestDTO;
 import com.uc.ms_security.service.AuthService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import com.uc.ms_security.service.TwoFactorCookieService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -20,33 +25,67 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final TwoFactorCookieService twoFactorCookieService;
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(
+    public ResponseEntity<AuthResponseDTO> login(
             @Valid @RequestBody LoginRequestDTO dto) {
-        Object response = authService.login(dto);
-        return response instanceof AuthResponseDTO
-                ? ResponseEntity.ok(response)
-                : ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+
+        LoginResultDTO result = authService.login(dto);
+
+        // Si el usuario no tiene habilitado el 2FA,
+        // devuelve directamente el JWT.
+        if (result.challengeId() == null) {
+            return ResponseEntity.ok(result.response());
+        }
+
+        // Si requiere 2FA, establece la cookie temporal.
+        HttpHeaders headers = new HttpHeaders();
+
+        twoFactorCookieService.addChallengeCookie(
+                headers,
+                result
+        );
+
+        return new ResponseEntity<>(
+                result.response(),
+                headers,
+                HttpStatus.ACCEPTED
+        );
     }
 
     @PostMapping("/2fa/verify")
-    public AuthResponseDTO verifyTwoFactor(
-            @Valid @RequestBody TwoFactorVerifyRequestDTO dto) {
-        return authService.verifyTwoFactor(dto);
-    }
+    public ResponseEntity<AuthResponseDTO> verifyTwoFactor(
+            HttpServletRequest request,
+            @Valid @RequestBody VerifyTwoFactorRequestDTO dto) {
 
-    @PutMapping("/2fa")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateTwoFactor(
-            Authentication authentication,
-            @Valid @RequestBody TwoFactorSettingsRequestDTO dto) {
-        authService.updateTwoFactor(Long.valueOf(authentication.getName()), dto);
+        // Recupera el identificador del desafío desde la cookie.
+        String challengeId = twoFactorCookieService
+                .findChallengeId(request)
+                .orElse(null);
+
+        // Verifica el código y genera el JWT definitivo.
+        AuthResponseDTO response = authService.verifyTwoFactor(
+                challengeId,
+                dto
+        );
+
+        // Elimina la cookie después de una verificación exitosa.
+        HttpHeaders headers = new HttpHeaders();
+
+        twoFactorCookieService.clearChallengeCookie(headers);
+
+        return new ResponseEntity<>(
+                response,
+                headers,
+                HttpStatus.OK
+        );
     }
 
     @PostMapping("/register")
     public RegisterResponseDTO register(
             @Valid @RequestBody RegisterRequestDTO dto) {
+
         return authService.register(dto);
     }
 }

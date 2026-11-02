@@ -1,4 +1,4 @@
-package com.uc.ms_security.dto;
+package com.uc.ms_security.dto.auth;
 
 public record RegisterResponseDTO(
         Long id,
