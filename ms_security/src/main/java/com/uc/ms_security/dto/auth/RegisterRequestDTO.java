@@ -1,4 +1,4 @@
-package com.uc.ms_security.dto;
+package com.uc.ms_security.dto.auth;
 
 import lombok.Getter;
 import lombok.Setter;

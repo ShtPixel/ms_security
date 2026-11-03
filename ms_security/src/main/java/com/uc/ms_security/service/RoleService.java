@@ -14,6 +14,8 @@ import com.uc.ms_security.exception.ErrorCase;
 import com.uc.ms_security.mapper.RoleMapper;
 import com.uc.ms_security.repository.RoleRepository;
 import com.uc.ms_security.repository.UserRoleRepository;
+import com.uc.ms_security.repository.RolePermissionRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +26,8 @@ public class RoleService {
     private final RoleRepository roleRepository;
 
     private final UserRoleRepository userRoleRepository;
+
+    private final RolePermissionRepository rolePermissionRepository;
 
     private final RoleMapper roleMapper;
 
@@ -80,14 +84,17 @@ public class RoleService {
         return roleMapper.toResponseDTO(updatedRole);
     }
 
+    @Transactional
     public void delete(Long id) {
         Role role = findRole(id);
         if (userRoleRepository.existsByRoleId(id)) {
             throw new ApplicationException(
                     ErrorCase.INVALID_OPERATION,
-                    "No se puede eliminar un rol que está asignado"
+                    "No se puede eliminar el rol porque está asignado a uno o más usuarios. Retire primero las asignaciones."
             );
         }
+        // Eliminar únicamente las asociaciones. Los permisos del catálogo permanecen intactos.
+        rolePermissionRepository.deleteAllByRoleId(id);
         roleRepository.delete(role);
     }
 }

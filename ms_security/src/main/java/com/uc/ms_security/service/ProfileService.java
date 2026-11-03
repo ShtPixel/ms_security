@@ -1,7 +1,5 @@
 package com.uc.ms_security.service;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.uc.ms_security.dto.profile.CreateProfileDTO;
@@ -27,18 +25,6 @@ public class ProfileService {
 
     private final UserRepository userRepository;
 
-    public ProfileResponseDTO create(CreateProfileDTO dto) {
-        if (profileRepository.existsByPhone(dto.getPhone())) {
-            throw new ApplicationException(
-                    ErrorCase.ALREADY_EXISTS,
-                    "Ya existe un perfil con este teléfono"
-            );
-        }
-        Profile profile = profileMapper.toEntity(dto);
-        Profile savedProfile = profileRepository.save(profile);
-        return profileMapper.toResponseDTO(savedProfile);
-    }
-
     public ProfileResponseDTO create(Long userId, CreateProfileDTO dto) {
         User user = findUser(userId);
         if (profileRepository.existsByUserId(userId)) {
@@ -47,6 +33,7 @@ public class ProfileService {
                     "El usuario ya tiene un perfil"
             );
         }
+
         if (profileRepository.existsByPhone(dto.getPhone())) {
             throw new ApplicationException(
                     ErrorCase.ALREADY_EXISTS,
@@ -58,37 +45,6 @@ public class ProfileService {
         profile.setUser(user);
         Profile savedProfile = profileRepository.save(profile);
         return profileMapper.toResponseDTO(savedProfile);
-    }
-
-    public List<ProfileResponseDTO> findAll() {
-        List<Profile> profiles = profileRepository.findAll();
-        return profileMapper.toResponseDTOList(profiles);
-    }
-
-    private Profile findProfile(Long id) {
-        return profileRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(
-                ErrorCase.NOT_FOUND,
-                "Perfil no encontrado con id: " + id
-        ));
-    }
-
-    public ProfileResponseDTO findById(Long id) {
-        Profile profile = findProfile(id);
-        return profileMapper.toResponseDTO(profile);
-    }
-
-    public ProfileResponseDTO update(Long id, UpdateProfileDTO dto) {
-        Profile profile = findProfile(id);
-        if (profileRepository.existsByPhoneAndIdNot(dto.getPhone(), id)) {
-            throw new ApplicationException(
-                    ErrorCase.ALREADY_EXISTS,
-                    "El teléfono pertenece a otro perfil"
-            );
-        }
-        profileMapper.updateEntity(dto, profile);
-        Profile updatedProfile = profileRepository.save(profile);
-        return profileMapper.toResponseDTO(updatedProfile);
     }
 
     public ProfileResponseDTO updateByUserId(Long userId, UpdateProfileDTO dto) {
@@ -106,11 +62,6 @@ public class ProfileService {
 
     public ProfileResponseDTO findByUserId(Long userId) {
         return profileMapper.toResponseDTO(findProfileByUserId(userId));
-    }
-
-    public void delete(Long id) {
-        Profile profile = findProfile(id);
-        profileRepository.delete(profile);
     }
 
     public void deleteByUserId(Long userId) {

@@ -33,6 +33,8 @@ public class DatabaseSeeder {
             new PermissionSeed("GET", "/api/users/without-roles", "User"),
             new PermissionSeed("PATCH", "/api/users/{id}/deactivate", "User"),
             new PermissionSeed("PATCH", "/api/users/{id}/activate", "User"),
+            new PermissionSeed("PATCH", "/api/users/{id}/2fa/activate", "User"),
+            new PermissionSeed("PATCH", "/api/users/{id}/2fa/desactivate", "User"),
             new PermissionSeed("GET", "/api/users/{id}/profile", "Profile"),
             new PermissionSeed("POST", "/api/users/{id}/profile", "Profile"),
             new PermissionSeed("PUT", "/api/users/{id}/profile", "Profile"),
@@ -117,14 +119,17 @@ public class DatabaseSeeder {
     }
 
     private User findOrCreateUser() {
-        return userRepository.findByEmail("admin@uc.edu.co")
+        User adminUser = userRepository.findByEmail("admin@uc.edu.co")
                 .orElseGet(() -> {
                     User user = new User();
                     user.setName("Administrador");
                     user.setEmail("admin@uc.edu.co");
                     user.setPassword(passwordEncoder.encode(adminPassword));
-                    return userRepository.save(user);
+                    return user;
                 });
+
+        adminUser.setTwoFA(false);
+        return userRepository.save(adminUser);
     }
 
     private Permission findOrCreatePermission(PermissionSeed seed) {

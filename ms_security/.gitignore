@@ -39,3 +39,4 @@ out/
 .idea/
 ¨*.iml
 .idea/modules/
+application-local.properties
