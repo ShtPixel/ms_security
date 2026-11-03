@@ -68,7 +68,7 @@ public class PasswordResetService {
         purgeExpired();
 
         String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
-        boolean userExists = userRepository.existsByEmail(normalizedEmail);
+        boolean userExists = userRepository.existsByEmailIgnoreCase(normalizedEmail);
 
         if (!userExists) {
             // No revelamos si el correo está registrado o no
@@ -157,7 +157,7 @@ public class PasswordResetService {
         }
 
         String email = parts[0];
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(this::invalidToken);
 
         user.setPassword(passwordEncoder.encode(newPassword));

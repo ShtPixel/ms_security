@@ -60,6 +60,33 @@ public class ProfileService {
         return profileMapper.toResponseDTO(updatedProfile);
     }
 
+    /** Creates or updates only the profile belonging to the authenticated user's ID. */
+    public ProfileResponseDTO saveOwnProfile(Long userId, UpdateProfileDTO dto) {
+        return profileRepository.findByUserId(userId)
+                .map(profile -> {
+                    if (profileRepository.existsByPhoneAndIdNot(dto.getPhone(), profile.getId())) {
+                        throw new ApplicationException(
+                                ErrorCase.ALREADY_EXISTS,
+                                "El teléfono pertenece a otro perfil"
+                        );
+                    }
+                    profileMapper.updateEntity(dto, profile);
+                    return profileMapper.toResponseDTO(profileRepository.save(profile));
+                })
+                .orElseGet(() -> {
+                    if (profileRepository.existsByPhone(dto.getPhone())) {
+                        throw new ApplicationException(
+                                ErrorCase.ALREADY_EXISTS,
+                                "Ya existe un perfil con este teléfono"
+                        );
+                    }
+                    User user = findUser(userId);
+                    Profile profile = profileMapper.toEntity(dto);
+                    profile.setUser(user);
+                    return profileMapper.toResponseDTO(profileRepository.save(profile));
+                });
+    }
+
     public ProfileResponseDTO findByUserId(Long userId) {
         return profileMapper.toResponseDTO(findProfileByUserId(userId));
     }

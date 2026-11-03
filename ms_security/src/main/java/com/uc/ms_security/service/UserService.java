@@ -16,7 +16,9 @@ import com.uc.ms_security.exception.ApplicationException;
 import com.uc.ms_security.exception.ErrorCase;
 import com.uc.ms_security.mapper.UserMapper;
 import com.uc.ms_security.repository.UserRepository;
+import com.uc.ms_security.repository.OAuthIdentityRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,18 +26,22 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    private final OAuthIdentityRepository oauthIdentityRepository;
+
     private final UserMapper userMapper;
 
     private final PasswordEncoder passwordEncoder;
 
     public UserResponseDTO create(CreateUserDTO dto) {
-        if (userRepository.existsByEmail(dto.getEmail())) {
+        String email = normalizeEmail(dto.getEmail());
+        if (userRepository.existsByEmailIgnoreCase(email)) {
             throw new ApplicationException(
                 ErrorCase.ALREADY_EXISTS,
                     "Ya existe un usuario con este email"
             );
         }
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
+        dto.setEmail(email);
         User user = userMapper.toEntity(dto, encodedPassword);
         User savedUser = userRepository.save(user);
         return userMapper.toResponseDTO(savedUser);
@@ -97,12 +103,14 @@ public class UserService {
 
     public UserResponseDTO update(Long id, UpdateUserDTO dto) {
         User user = findUser(id);
-        if (userRepository.existsByEmailAndIdNot(dto.getEmail(), id)) {
+        String email = normalizeEmail(dto.getEmail());
+        if (userRepository.existsByEmailIgnoreCaseAndIdNot(email, id)) {
             throw new ApplicationException(
                 ErrorCase.ALREADY_EXISTS,
                     "El email pertenece a otro usuario"
             );
         }
+        dto.setEmail(email);
         userMapper.updateBasicData(dto, user);
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -110,8 +118,10 @@ public class UserService {
         User updatedUser = userRepository.save(user);
         return userMapper.toResponseDTO(updatedUser);
     }
+    @Transactional
     public void delete(Long id) {
         User user = findUser(id);
+        oauthIdentityRepository.deleteAllByUserId(id);
         userRepository.delete(user);
     }
 
@@ -139,5 +149,15 @@ public class UserService {
         User user = findUser(id);
         user.setTwoFA(false);
         return userMapper.toResponseDTO(userRepository.save(user));
+    }
+
+    public UserResponseDTO updateOwnTwoFA(Long userId, boolean enabled) {
+        User user = findUser(userId);
+        user.setTwoFA(enabled);
+        return userMapper.toResponseDTO(userRepository.save(user));
+    }
+
+    private String normalizeEmail(String email) {
+        return email.trim().toLowerCase(java.util.Locale.ROOT);
     }
 }

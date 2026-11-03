@@ -3,6 +3,8 @@ package com.uc.ms_security.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,10 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.uc.ms_security.dto.user.CreateUserDTO;
 import com.uc.ms_security.dto.user.UpdateUserDTO;
+import com.uc.ms_security.dto.user.UpdateTwoFactorRequestDTO;
 import com.uc.ms_security.dto.user.UserDetailResponseDTO;
 import com.uc.ms_security.dto.user.UserResponseDTO;
 import com.uc.ms_security.dto.user.UserRolesResponseDTO;
 import com.uc.ms_security.dto.user.UserSessionsResponseDTO;
+import com.uc.ms_security.dto.profile.ProfileResponseDTO;
+import com.uc.ms_security.dto.profile.UpdateProfileDTO;
+import com.uc.ms_security.service.ProfileService;
 import com.uc.ms_security.service.UserService;
 
 import jakarta.validation.Valid;
@@ -31,6 +37,38 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     private final UserService userService;
+    private final ProfileService profileService;
+
+    @GetMapping("/me")
+    public UserResponseDTO findOwnUser(@AuthenticationPrincipal Jwt jwt) {
+        return userService.findById(Long.valueOf(jwt.getSubject()));
+    }
+
+    @PutMapping("/me")
+    public UserResponseDTO updateOwnUser(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody UpdateUserDTO dto) {
+        return userService.update(Long.valueOf(jwt.getSubject()), dto);
+    }
+
+    @GetMapping("/me/profile")
+    public ProfileResponseDTO findOwnProfile(@AuthenticationPrincipal Jwt jwt) {
+        return profileService.findByUserId(Long.valueOf(jwt.getSubject()));
+    }
+
+    @PutMapping("/me/profile")
+    public ProfileResponseDTO saveOwnProfile(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody UpdateProfileDTO dto) {
+        return profileService.saveOwnProfile(Long.valueOf(jwt.getSubject()), dto);
+    }
+
+    @PutMapping("/me/2fa")
+    public UserResponseDTO updateOwnTwoFA(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody UpdateTwoFactorRequestDTO request) {
+        return userService.updateOwnTwoFA(Long.valueOf(jwt.getSubject()), request.enabled());
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -20,6 +20,14 @@ public class ProfileMapper {
         return profile;
     }
 
+    public Profile toEntity(UpdateProfileDTO dto) {
+        Profile profile = new Profile();
+        profile.setPhone(dto.getPhone());
+        profile.setBirthDate(dto.getBirthDate());
+        profile.setPhoto(dto.getPhoto());
+        return profile;
+    }
+
     public void updateEntity(UpdateProfileDTO dto, Profile profile) {
         profile.setPhone(dto.getPhone());
         profile.setBirthDate(dto.getBirthDate());

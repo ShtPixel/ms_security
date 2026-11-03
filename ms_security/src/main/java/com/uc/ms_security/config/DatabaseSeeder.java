@@ -93,12 +93,7 @@ public class DatabaseSeeder {
                 assignPermission(adminRole, findOrCreatePermission(seed));
             }
 
-            assignPermission(
-                    consultantRole,
-                    findOrCreatePermission(
-                            new PermissionSeed("GET", "/api/users", "User")
-                    )
-            );
+            revokePermission(consultantRole, "GET", "/api/users");
             assignPermission(
                     consultantRole,
                     findOrCreatePermission(
@@ -165,6 +160,13 @@ public class DatabaseSeeder {
             rolePermission.setPermission(permission);
             rolePermissionRepository.save(rolePermission);
         }
+    }
+
+    private void revokePermission(Role role, String method, String url) {
+        permissionRepository.findByUrlAndMethod(url, method)
+                .flatMap(permission -> rolePermissionRepository
+                        .findByRoleIdAndPermissionId(role.getId(), permission.getId()))
+                .ifPresent(rolePermissionRepository::delete);
     }
 
     private record PermissionSeed(String method, String url, String model) {

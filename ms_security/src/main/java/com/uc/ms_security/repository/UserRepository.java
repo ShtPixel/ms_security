@@ -13,9 +13,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
 
+    boolean existsByEmailIgnoreCase(String email);
+
     boolean existsByEmailAndIdNot(String email, Long id);
 
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
+
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByEmailIgnoreCase(String email);
 
     @EntityGraph(attributePaths = {"profile"})
     Optional<User> findWithProfileById(Long id);

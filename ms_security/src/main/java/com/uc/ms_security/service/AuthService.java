@@ -30,7 +30,8 @@ public class AuthService {
     private final TwoFactorAuthenticationService twoFactorAuthenticationService;
 
     public LoginResultDTO login(LoginRequestDTO dto) {
-        User user = userRepository.findByEmail(dto.getEmail()).orElseThrow(this::unauthorized);
+        String email = dto.getEmail().trim().toLowerCase(java.util.Locale.ROOT);
+        User user = userRepository.findByEmailIgnoreCase(email).orElseThrow(this::unauthorized);
 
         if (!user.isActive()) {
             throw unauthorized();
@@ -70,7 +71,8 @@ public class AuthService {
     }
     
     public RegisterResponseDTO register(RegisterRequestDTO dto) {
-        if (userRepository.existsByEmail(dto.getEmail())) {
+        String email = dto.getEmail().trim().toLowerCase(java.util.Locale.ROOT);
+        if (userRepository.existsByEmailIgnoreCase(email)) {
             throw new ApplicationException(
                     ErrorCase.ALREADY_EXISTS,
                     "El correo ya está registrado"
@@ -78,6 +80,7 @@ public class AuthService {
         }
 
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
+        dto.setEmail(email);
         User user = userMapper.toEntity(dto, encodedPassword);
         User savedUser = userRepository.save(user);
 
