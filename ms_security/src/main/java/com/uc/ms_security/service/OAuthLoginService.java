@@ -5,6 +5,7 @@ import com.uc.ms_security.exception.ApplicationException;
 import com.uc.ms_security.exception.ErrorCase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -18,10 +19,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class OAuthLoginService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(OAuthLoginService.class);
+    private static final Pattern PROVIDER_ERROR_PATTERN = Pattern.compile("\"error\"\\s*:\\s*\"([A-Za-z0-9_-]{1,80})\"");
     private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
     private static final long STATE_LIFETIME_SECONDS = 300;
 
@@ -78,15 +85,25 @@ public class OAuthLoginService {
                     ? fetchGoogleProfile(config, code, codeVerifier)
                     : fetchGitHubProfile(config, code, codeVerifier);
             return accountService.login(provider, profile.subject(), profile.email(), profile.name());
-        } catch (RestClientException exception) {
+        } catch (RestClientResponseException exception) {
+            String providerError = extractProviderError(exception.getResponseBodyAsString());
+            LOGGER.warn("Proveedor OAuth {} rechazó la solicitud (HTTP {}, error {}).",
+                    provider, exception.getStatusCode().value(), providerError == null ? "sin_detalle" : providerError);
+            String detail = providerError == null ? "" : " Código del proveedor: " + providerError + ".";
             throw new ApplicationException(ErrorCase.UNAUTHORIZED,
-                    "El proveedor rechazó la autenticación OAuth", exception);
+                    "El proveedor rechazó la autenticación OAuth (HTTP "
+                            + exception.getStatusCode().value() + ")." + detail, exception);
+        } catch (RestClientException exception) {
+            LOGGER.warn("No se pudo completar la solicitud OAuth con {} ({}).",
+                    provider, exception.getClass().getSimpleName());
+            throw new ApplicationException(ErrorCase.SERVICE_UNAVAILABLE,
+                    "No fue posible comunicarse con el proveedor OAuth", exception);
         }
     }
 
     private OAuthProfile fetchGoogleProfile(ProviderConfig config, String code, String codeVerifier) {
         Map<?, ?> tokens = exchangeCode(
-                "https://oauth2.googleapis.com/token", config, code, codeVerifier);
+                "https://oauth2.googleapis.com/token", config, code, codeVerifier, true);
         if (tokens == null) throw invalidOAuthResponse();
         String accessToken = value(tokens, "access_token");
         if (accessToken == null) throw invalidOAuthResponse();
@@ -105,7 +122,7 @@ public class OAuthLoginService {
 
     private OAuthProfile fetchGitHubProfile(ProviderConfig config, String code, String codeVerifier) {
         Map<?, ?> tokens = exchangeCode(
-                "https://github.com/login/oauth/access_token", config, code, codeVerifier);
+                "https://github.com/login/oauth/access_token", config, code, codeVerifier, false);
         if (tokens == null) throw invalidOAuthResponse();
         String accessToken = value(tokens, "access_token");
         if (accessToken == null) throw invalidOAuthResponse();
@@ -137,8 +154,9 @@ public class OAuthLoginService {
     }
 
     private Map<?, ?> exchangeCode(String tokenUri, ProviderConfig config,
-                                   String code, String codeVerifier) {
+                                   String code, String codeVerifier, boolean google) {
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        if (google) form.add("grant_type", "authorization_code");
         form.add("client_id", config.clientId());
         form.add("client_secret", config.clientSecret());
         form.add("code", code);
@@ -173,6 +191,12 @@ public class OAuthLoginService {
     private String value(Map<?, ?> map, String key) {
         Object value = map.get(key);
         return value == null ? null : value.toString();
+    }
+
+    private String extractProviderError(String responseBody) {
+        if (responseBody == null || responseBody.length() > 10_000) return null;
+        Matcher matcher = PROVIDER_ERROR_PATTERN.matcher(responseBody);
+        return matcher.find() ? matcher.group(1) : null;
     }
 
     private boolean constantTimeEquals(String left, String right) {
