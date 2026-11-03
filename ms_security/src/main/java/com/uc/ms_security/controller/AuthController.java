@@ -1,15 +1,19 @@
 package com.uc.ms_security.controller;
 
 import com.uc.ms_security.dto.auth.AuthResponseDTO;
+import com.uc.ms_security.dto.auth.ForgotPasswordRequestDTO;
 import com.uc.ms_security.dto.auth.LoginRequestDTO;
 import com.uc.ms_security.dto.auth.LoginResultDTO;
 import com.uc.ms_security.dto.auth.OAuthExchangeRequestDTO;
 import com.uc.ms_security.dto.auth.OAuthStateResponseDTO;
 import com.uc.ms_security.dto.auth.RegisterRequestDTO;
 import com.uc.ms_security.dto.auth.RegisterResponseDTO;
+import com.uc.ms_security.dto.auth.ResetPasswordRequestDTO;
+import com.uc.ms_security.dto.auth.VerifyResetCodeRequestDTO;
 import com.uc.ms_security.dto.auth.VerifyTwoFactorRequestDTO;
 import com.uc.ms_security.service.AuthService;
 import com.uc.ms_security.service.OAuthLoginService;
+import com.uc.ms_security.service.PasswordResetService;
 import com.uc.ms_security.service.TwoFactorCookieService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -17,13 +21,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -33,6 +38,7 @@ public class AuthController {
     private final AuthService authService;
     private final TwoFactorCookieService twoFactorCookieService;
     private final OAuthLoginService oAuthLoginService;
+    private final PasswordResetService passwordResetService;
 
     @Value("${security.oauth.cookie-secure:false}")
     private boolean oauthCookieSecure;
@@ -45,29 +51,18 @@ public class AuthController {
 
         LoginResultDTO result = authService.login(dto);
 
-        // Si el usuario no tiene habilitado el 2FA,
-        // devuelve directamente el JWT.
         if (result.challengeId() == null) {
             return ResponseEntity.ok(result.response());
         }
 
-        // Si requiere 2FA, establece la cookie temporal y cabecera de desafío.
         HttpHeaders headers = new HttpHeaders();
-
-        twoFactorCookieService.addChallengeCookie(
-                headers,
-                result
-        );
+        twoFactorCookieService.addChallengeCookie(headers, result);
 
         if (result.challengeId() != null) {
             headers.add("X-2FA-Challenge-Id", result.challengeId());
         }
 
-        return new ResponseEntity<>(
-                result.response(),
-                headers,
-                HttpStatus.ACCEPTED
-        );
+        return new ResponseEntity<>(result.response(), headers, HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/2fa/verify")
@@ -75,27 +70,16 @@ public class AuthController {
             HttpServletRequest request,
             @Valid @RequestBody VerifyTwoFactorRequestDTO dto) {
 
-        // Recupera el identificador del desafío desde la cabecera o cookie.
         String challengeId = twoFactorCookieService
                 .findChallengeId(request)
                 .orElse(null);
 
-        // Verifica el código y genera el JWT definitivo.
-        AuthResponseDTO response = authService.verifyTwoFactor(
-                challengeId,
-                dto
-        );
+        AuthResponseDTO response = authService.verifyTwoFactor(challengeId, dto);
 
-        // Elimina la cookie después de una verificación exitosa.
         HttpHeaders headers = new HttpHeaders();
-
         twoFactorCookieService.clearChallengeCookie(headers);
 
-        return new ResponseEntity<>(
-                response,
-                headers,
-                HttpStatus.OK
-        );
+        return new ResponseEntity<>(response, headers, HttpStatus.OK);
     }
 
     @PostMapping("/register")
@@ -104,6 +88,53 @@ public class AuthController {
 
         return authService.register(dto);
     }
+
+    // ------------------------------------------------------------------ //
+    //  Recuperación de contraseña                                         //
+    // ------------------------------------------------------------------ //
+
+    /**
+     * Paso 1: el usuario solicita el código OTP enviando su correo.
+     * Siempre responde 200 para no revelar si el correo existe o no.
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequestDTO dto) {
+
+        passwordResetService.sendResetCode(dto.email());
+        return ResponseEntity.ok(Map.of(
+                "message", "Si el correo está registrado recibirás un código de recuperación."
+        ));
+    }
+
+    /**
+     * Paso 2: el usuario verifica el código OTP.
+     * Devuelve un {@code resetToken} de un solo uso para autorizar el cambio de contraseña.
+     */
+    @PostMapping("/reset-password/verify")
+    public ResponseEntity<Map<String, String>> verifyResetCode(
+            @Valid @RequestBody VerifyResetCodeRequestDTO dto) {
+
+        String resetToken = passwordResetService.verifyCode(dto.email(), dto.code());
+        return ResponseEntity.ok(Map.of("resetToken", resetToken));
+    }
+
+    /**
+     * Paso 3: el usuario cambia su contraseña usando el {@code resetToken}.
+     */
+    @PostMapping("/reset-password/confirm")
+    public ResponseEntity<Map<String, String>> confirmResetPassword(
+            @Valid @RequestBody ResetPasswordRequestDTO dto) {
+
+        passwordResetService.resetPassword(dto.resetToken(), dto.newPassword());
+        return ResponseEntity.ok(Map.of(
+                "message", "Contraseña actualizada exitosamente. Ya puedes iniciar sesión."
+        ));
+    }
+
+    // ------------------------------------------------------------------ //
+    //  OAuth                                                              //
+    // ------------------------------------------------------------------ //
 
     @PostMapping("/oauth/{provider}/state")
     public ResponseEntity<OAuthStateResponseDTO> createOAuthState(

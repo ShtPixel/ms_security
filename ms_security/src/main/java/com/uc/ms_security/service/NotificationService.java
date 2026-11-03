@@ -39,4 +39,21 @@ public class NotificationService {
             );
         }
     }
+
+    public void sendPasswordResetCode(String email, String code) {
+        try {
+            restClient.post()
+                    .uri("/notifications/password-reset")
+                    .body(new NotificationRequestDTO(email, code))
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (RestClientException exception) {
+            LOGGER.error("Falló el envío del código de recuperación al servicio de notificaciones", exception);
+            throw new ApplicationException(
+                    ErrorCase.SERVICE_UNAVAILABLE,
+                    "No se pudo enviar el código de recuperación de contraseña",
+                    exception
+            );
+        }
+    }
 }
