@@ -32,9 +32,12 @@ public class SecurityConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Origen de tu frontend Angular
-        configuration.setAllowedOrigins(
-                List.of("http://localhost:4200")
+        // Permitir orígenes locales (Vite, React, Angular en 3000, 5173, 4200, etc.)
+        configuration.setAllowedOriginPatterns(
+                List.of(
+                        "http://localhost:*",
+                        "http://127.0.0.1:*"
+                )
         );
 
         configuration.setAllowedMethods(
@@ -49,9 +52,14 @@ public class SecurityConfig {
         );
 
         configuration.setAllowedHeaders(
+                List.of("*")
+        );
+
+        configuration.setExposedHeaders(
                 List.of(
                         "Authorization",
-                        "Content-Type"
+                        "Set-Cookie",
+                        "X-2FA-Challenge-Id"
                 )
         );
 
@@ -71,6 +79,7 @@ public class SecurityConfig {
             HttpSecurity http) throws Exception {
 
         http
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(

@@ -17,7 +17,7 @@ import java.util.Optional;
 public class TwoFactorCookieService {
 
     private static final String COOKIE_NAME = "twoFactorChallenge";
-    private static final String COOKIE_PATH = "/api/auth/2fa/verify";
+    private static final String COOKIE_PATH = "/";
 
     @Value("${security.two-factor.cookie-secure:false}")
     private boolean secureCookie;
@@ -31,6 +31,11 @@ public class TwoFactorCookieService {
     }
 
     public Optional<String> findChallengeId(HttpServletRequest request) {
+        String headerChallenge = request.getHeader("X-2FA-Challenge-Id");
+        if (headerChallenge != null && !headerChallenge.isBlank()) {
+            return Optional.of(headerChallenge.trim());
+        }
+
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
             return Optional.empty();
@@ -53,7 +58,7 @@ public class TwoFactorCookieService {
         return ResponseCookie.from(COOKIE_NAME, value)
                 .httpOnly(true)
                 .secure(secureCookie)
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .path(COOKIE_PATH)
                 .maxAge(maxAge.isNegative() ? Duration.ZERO : maxAge)
                 .build();

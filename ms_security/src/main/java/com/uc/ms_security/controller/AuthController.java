@@ -39,13 +39,17 @@ public class AuthController {
             return ResponseEntity.ok(result.response());
         }
 
-        // Si requiere 2FA, establece la cookie temporal.
+        // Si requiere 2FA, establece la cookie temporal y cabecera de desafío.
         HttpHeaders headers = new HttpHeaders();
 
         twoFactorCookieService.addChallengeCookie(
                 headers,
                 result
         );
+
+        if (result.challengeId() != null) {
+            headers.add("X-2FA-Challenge-Id", result.challengeId());
+        }
 
         return new ResponseEntity<>(
                 result.response(),
@@ -59,7 +63,7 @@ public class AuthController {
             HttpServletRequest request,
             @Valid @RequestBody VerifyTwoFactorRequestDTO dto) {
 
-        // Recupera el identificador del desafío desde la cookie.
+        // Recupera el identificador del desafío desde la cabecera o cookie.
         String challengeId = twoFactorCookieService
                 .findChallengeId(request)
                 .orElse(null);
