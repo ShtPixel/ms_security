@@ -90,6 +90,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/2fa/verify").permitAll()
+                        .requestMatchers("/api/auth/oauth/**").permitAll()
                         .anyRequest().access(dynamicAuthorizationManager)
                 )
                 .oauth2ResourceServer(resourceServer ->

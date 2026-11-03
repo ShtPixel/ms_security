@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "d6307d76-5eb5-4db4-b877-e375f47f3eb4",
     "name": "Módulo de Seguridad - HU-SE-01 a HU-SE-10",
-    "description": "Colección construida a partir de Anexo_1_Módulo Seguridad.docx y contrastada con los controladores y DTO existentes. Cada solicitud indica si la ruta está IMPLEMENTADA o PROPUESTA (pendiente de implementar o incompleta). Las rutas PROPUESTAS son contratos sugeridos para satisfacer las historias, no endpoints que se afirme que ya existen. Base local: http://localhost:8181. Las operaciones administrativas requieren un accessToken con permisos. Las historias HU-SE-08 y HU-SE-10 requieren que la API persista y revoque sesiones/token; actualmente el login implementado devuelve JWT y no hay rutas de OAuth, recuperación, 2FA ni cierre de sesión.",
+    "description": "Colección de endpoints del módulo de seguridad. El login local y OAuth con Google/GitHub emiten JWT internos; OAuth requiere credenciales de proveedor configuradas en el backend. Microsoft no está habilitado.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -577,7 +577,20 @@
           }
         },
         {
-          "name": "Intercambiar código OAuth con Google [PROPUESTA]",
+          "name": "Crear state OAuth de Google [IMPLEMENTADA]",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/oauth/google/state",
+            "description": "Solicita un state de un solo uso. Postman conserva la cookie HttpOnly; usa el state devuelto al construir la autorización de Google."
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": ["if (pm.response.code === 200) pm.collectionVariables.set('oauthStateGoogle', pm.response.json().state);"] }
+          }]
+        },
+        {
+          "name": "Intercambiar código OAuth con Google [IMPLEMENTADA]",
           "event": [
             {
               "listen": "test",
@@ -604,14 +617,27 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"CODIGO_AUTORIZACION_DEVUELTO_POR_GOOGLE\",\n  \"redirectUri\": \"http://localhost:3000/auth/callback/google\",\n  \"codeVerifier\": \"VERIFICADOR_PKCE\",\n  \"state\": \"STATE_VALIDADO_POR_EL_CLIENTE\"\n}"
+              "raw": "{\n  \"code\": \"CODIGO_AUTORIZACION_DEVUELTO_POR_GOOGLE\",\n  \"redirectUri\": \"http://localhost:3000/auth/callback/google\",\n  \"codeVerifier\": \"VERIFICADOR_PKCE\",\n  \"state\": \"{{oauthStateGoogle}}\"\n}"
             },
             "url": "{{baseUrl}}/api/auth/oauth/google",
-            "description": "Contrato sugerido: el backend intercambia/verifica el código con Google, identifica o crea al usuario OAuth y emite una sesión interna. No enviar client secret desde Postman ni desde un cliente público. No implementado."
+            "description": "El backend intercambia y verifica el código, valida state y PKCE, crea o localiza la cuenta y emite su JWT. Solicita scopes openid, email y profile. No enviar el client secret al cliente."
           }
         },
         {
-          "name": "Intercambiar código OAuth con GitHub [PROPUESTA]",
+          "name": "Crear state OAuth de GitHub [IMPLEMENTADA]",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/oauth/github/state",
+            "description": "Solicita un state de un solo uso. Postman conserva la cookie HttpOnly; usa el state devuelto al construir la autorización de GitHub."
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "type": "text/javascript", "exec": ["if (pm.response.code === 200) pm.collectionVariables.set('oauthStateGithub', pm.response.json().state);"] }
+          }]
+        },
+        {
+          "name": "Intercambiar código OAuth con GitHub [IMPLEMENTADA]",
           "request": {
             "auth": {
               "type": "noauth"
@@ -625,31 +651,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"CODIGO_AUTORIZACION_DEVUELTO_POR_GITHUB\",\n  \"redirectUri\": \"http://localhost:3000/auth/callback/github\",\n  \"codeVerifier\": \"VERIFICADOR_PKCE\",\n  \"state\": \"STATE_VALIDADO_POR_EL_CLIENTE\"\n}"
+              "raw": "{\n  \"code\": \"CODIGO_AUTORIZACION_DEVUELTO_POR_GITHUB\",\n  \"redirectUri\": \"http://localhost:3000/auth/callback/github\",\n  \"codeVerifier\": \"VERIFICADOR_PKCE\",\n  \"state\": \"{{oauthStateGithub}}\"\n}"
             },
             "url": "{{baseUrl}}/api/auth/oauth/github",
-            "description": "Contrato sugerido para GitHub. Aplicar las mismas reglas de vinculación de proveedor/email y evitar usuarios duplicados. No implementado."
-          }
-        },
-        {
-          "name": "Intercambiar código OAuth con Microsoft [PROPUESTA]",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"code\": \"CODIGO_AUTORIZACION_DEVUELTO_POR_MICROSOFT\",\n  \"redirectUri\": \"http://localhost:3000/auth/callback/microsoft\",\n  \"codeVerifier\": \"VERIFICADOR_PKCE\",\n  \"state\": \"STATE_VALIDADO_POR_EL_CLIENTE\"\n}"
-            },
-            "url": "{{baseUrl}}/api/auth/oauth/microsoft",
-            "description": "Contrato sugerido para Microsoft, como proveedor adicional indicado por las historias. No implementado."
+            "description": "El backend intercambia el código, valida state y PKCE, consulta el perfil y el correo primario verificado y emite su JWT. Solicita scopes read:user y user:email. No enviar el client secret al cliente."
           }
         },
         {

@@ -126,7 +126,7 @@ public class DatabaseSeeder {
                     return user;
                 });
 
-        adminUser.setTwoFA(true);
+        adminUser.setTwoFA(false);
         return userRepository.save(adminUser);
     }
 
