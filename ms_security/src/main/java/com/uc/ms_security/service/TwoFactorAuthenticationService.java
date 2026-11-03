@@ -23,16 +23,12 @@ import java.util.concurrent.ConcurrentMap;
 public class TwoFactorAuthenticationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TwoFactorAuthenticationService.class);
-    private static final String DEFAULT_TWO_FACTOR_EMAIL = "santiago.quintero50836@ucaldas.edu.co";
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final int CODE_VALIDITY_MINUTES = 5;
 
     private final PasswordEncoder passwordEncoder;
     private final NotificationService notificationService;
     private final ConcurrentMap<String, Session> pendingSessions = new ConcurrentHashMap<>();
-
-    @Value("${security.two-factor.email:santiago.quintero50836@ucaldas.edu.co}")
-    private String configuredTwoFactorEmail;
 
     public TwoFactorAuthenticationService(PasswordEncoder passwordEncoder, NotificationService notificationService) {
         this.passwordEncoder = passwordEncoder;
@@ -52,7 +48,7 @@ public class TwoFactorAuthenticationService {
         session.setUser(user);
 
         String recipientEmail = resolveRecipientEmail(user);
-        LOGGER.info(">>> [2FA SECURITY] Código generado para {}: {} (Vence en {} min)", recipientEmail, code, CODE_VALIDITY_MINUTES);
+        LOGGER.info("Código 2FA generado para {} (vence en {} min)", recipientEmail, CODE_VALIDITY_MINUTES);
 
         notificationService.sendTwoFactorCode(recipientEmail, code);
 
@@ -64,13 +60,10 @@ public class TwoFactorAuthenticationService {
     }
 
     private String resolveRecipientEmail(User user) {
-        if (configuredTwoFactorEmail != null && !configuredTwoFactorEmail.isBlank()) {
-            return configuredTwoFactorEmail.trim();
-        }
         if (user != null && user.getEmail() != null && !user.getEmail().isBlank()) {
             return user.getEmail().trim();
         }
-        return DEFAULT_TWO_FACTOR_EMAIL;
+        throw new IllegalArgumentException("El usuario debe tener un correo para recibir el código 2FA");
     }
 
     public Session verifyCode(String challengeId, String code) {
