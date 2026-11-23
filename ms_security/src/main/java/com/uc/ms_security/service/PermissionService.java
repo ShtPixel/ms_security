@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.AntPathMatcher;
 
 import com.uc.ms_security.dto.permission.CreatePermissionDTO;
 import com.uc.ms_security.dto.permission.PermissionResponseDTO;
@@ -22,8 +23,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PermissionService {
 
-    private static final Pattern RESOURCE_ID_SEGMENT =
-            Pattern.compile("(?i)(?<=/)(?:\\d+|[a-f0-9]{24})(?=/|$)");
+    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
+    private static final Pattern RESOURCE_ID =
+            Pattern.compile(
+                    "^(?:\\d+|[a-fA-F0-9]{24}|"
+                            + "[a-fA-F0-9]{8}(?:-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12})$"
+            );
 
     private final PermissionRepository permissionRepository;
 
@@ -94,19 +99,40 @@ public class PermissionService {
             String httpMethod,
             String requestUrl
     ) {
-        return !permissionRepository.findByUserIdAndMethodAndUrl(
+        return permissionRepository.findByUserIdAndMethod(
                 userId,
-                normalizeMethod(httpMethod),
-                normalizeUrl(requestUrl)
-        ).isEmpty();
+                normalizeMethod(httpMethod)
+        ).stream().anyMatch(permission ->
+                matchesParameterizedUrl(permission.getUrl(), requestUrl)
+        );
+    }
+
+    private boolean matchesParameterizedUrl(
+            String permissionUrl,
+            String requestUrl
+    ) {
+        if (!PATH_MATCHER.match(permissionUrl, requestUrl)) {
+            return false;
+        }
+
+        String[] permissionSegments = permissionUrl.split("/", -1);
+        String[] requestSegments = requestUrl.split("/", -1);
+        if (permissionSegments.length != requestSegments.length) {
+            return false;
+        }
+
+        for (int index = 0; index < permissionSegments.length; index++) {
+            String segment = permissionSegments[index];
+            if (segment.startsWith("{")
+                    && segment.endsWith("}")
+                    && !RESOURCE_ID.matcher(requestSegments[index]).matches()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private String normalizeMethod(String method) {
         return method.toUpperCase(Locale.ROOT);
-    }
-
-    private String normalizeUrl(String requestUrl) {
-        return RESOURCE_ID_SEGMENT.matcher(requestUrl)
-                .replaceAll("{id}");
     }
 }

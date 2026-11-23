@@ -59,6 +59,29 @@
   ],
   "item": [
     {
+      "name": "Validar permiso de Cinema [IMPLEMENTADA]",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"url\": \"/movies\",\n  \"method\": \"POST\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/internal/security/permissions-validation",
+        "description": "Requiere un JWT válido en {{accessToken}}. Con el usuario ADMIN, POST /movies debe responder {\"allowed\":true}; prueba una ruta no asignada para obtener {\"allowed\":false}."
+      }
+    },
+    {
       "name": "HU-SE-01 - Gestionar usuarios",
       "description": "Alta, consulta, actualización y eliminación de usuarios. El borrado implementado es físico; la desactivación conservando los datos y las asignaciones no está implementada.",
       "item": [

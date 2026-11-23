@@ -64,7 +64,46 @@ public class DatabaseSeeder {
             new PermissionSeed("POST", "/api/role-permissions", "RolePermission"),
             new PermissionSeed("GET", "/api/role-permissions/roles/{id}", "RolePermission"),
             new PermissionSeed("GET", "/api/role-permissions/permissions/{id}", "RolePermission"),
-            new PermissionSeed("DELETE", "/api/role-permissions/{id}/{id}", "RolePermission")
+            new PermissionSeed("DELETE", "/api/role-permissions/{id}/{id}", "RolePermission"),
+
+            new PermissionSeed("POST", "/theaters", "Theater"),
+            new PermissionSeed("GET", "/theaters", "Theater"),
+            new PermissionSeed("GET", "/theaters/{id}", "Theater"),
+            new PermissionSeed("PATCH", "/theaters/{id}", "Theater"),
+            new PermissionSeed("DELETE", "/theaters/{id}", "Theater"),
+            new PermissionSeed("GET", "/theaters/reports/large/{minCapacity}", "Theater"),
+
+            new PermissionSeed("POST", "/projectors", "Projector"),
+            new PermissionSeed("GET", "/projectors", "Projector"),
+            new PermissionSeed("GET", "/projectors/{id}", "Projector"),
+            new PermissionSeed("PATCH", "/projectors/{id}", "Projector"),
+            new PermissionSeed("DELETE", "/projectors/{id}", "Projector"),
+
+            new PermissionSeed("POST", "/seats", "Seat"),
+            new PermissionSeed("GET", "/seats", "Seat"),
+            new PermissionSeed("GET", "/seats/{id}", "Seat"),
+            new PermissionSeed("PATCH", "/seats/{id}", "Seat"),
+            new PermissionSeed("DELETE", "/seats/{id}", "Seat"),
+            new PermissionSeed(
+                    "GET",
+                    "/seats/reports/theater/{theaterId}/reclining-count",
+                    "Seat"
+            ),
+
+            new PermissionSeed("POST", "/movies", "Movie"),
+            new PermissionSeed("GET", "/movies", "Movie"),
+            new PermissionSeed("GET", "/movies/{id}", "Movie"),
+            new PermissionSeed("PATCH", "/movies/{id}", "Movie"),
+            new PermissionSeed("DELETE", "/movies/{id}", "Movie"),
+            new PermissionSeed("GET", "/movies/reports/oldest", "Movie"),
+            new PermissionSeed("GET", "/movies/reports/most-screenings", "Movie"),
+
+            new PermissionSeed("POST", "/screenings", "Screening"),
+            new PermissionSeed("GET", "/screenings", "Screening"),
+            new PermissionSeed("GET", "/screenings/{id}", "Screening"),
+            new PermissionSeed("PATCH", "/screenings/{id}", "Screening"),
+            new PermissionSeed("DELETE", "/screenings/{id}", "Screening"),
+            new PermissionSeed("GET", "/screenings/reports/next-three", "Screening")
     };
 
     private final UserRepository userRepository;

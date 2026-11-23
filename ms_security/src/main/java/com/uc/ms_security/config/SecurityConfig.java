@@ -95,6 +95,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/forgot-password").permitAll()
                         .requestMatchers("/api/auth/reset-password/verify").permitAll()
                         .requestMatchers("/api/auth/reset-password/confirm").permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/internal/security/permissions-validation"
+                        ).authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/users/me", "/api/users/me/profile").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/users/me", "/api/users/me/profile").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/users/me/2fa").authenticated()

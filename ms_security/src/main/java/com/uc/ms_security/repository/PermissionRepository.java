@@ -24,11 +24,9 @@ public interface PermissionRepository extends JpaRepository<Permission, Long> {
             JOIN r.userRoles ur
             WHERE ur.user.id = :userId
               AND UPPER(p.method) = UPPER(:method)
-              AND p.url = :url
             """)
-    List<Permission> findByUserIdAndMethodAndUrl(
+    List<Permission> findByUserIdAndMethod(
             @Param("userId") Long userId,
-            @Param("method") String method,
-            @Param("url") String url
+            @Param("method") String method
     );
 }
