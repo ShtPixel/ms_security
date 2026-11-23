@@ -15,7 +15,6 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class DynamicAuthorizationManager
         implements AuthorizationManager<RequestAuthorizationContext> {
-
     private final PermissionService permissionService;
 
     @Override

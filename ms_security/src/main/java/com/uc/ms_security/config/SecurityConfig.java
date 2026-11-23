@@ -102,6 +102,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users/me", "/api/users/me/profile").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/users/me", "/api/users/me/profile").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/users/me/2fa").authenticated()
+                        .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/roles/**").authenticated()
+                        .requestMatchers("/api/permissions/**").authenticated()
+                        .requestMatchers("/api/user-roles/**").authenticated()
+                        .requestMatchers("/api/role-permissions/**").authenticated()
                 )
                 .oauth2ResourceServer(resourceServer ->
                         resourceServer.jwt(Customizer.withDefaults())
