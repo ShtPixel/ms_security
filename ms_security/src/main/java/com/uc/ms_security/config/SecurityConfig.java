@@ -1,6 +1,5 @@
 package com.uc.ms_security.config;
 
-import com.uc.ms_security.authorization.DynamicAuthorizationManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +19,6 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-    private final DynamicAuthorizationManager dynamicAuthorizationManager;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
