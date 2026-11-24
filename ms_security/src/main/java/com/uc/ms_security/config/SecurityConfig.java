@@ -1,5 +1,6 @@
 package com.uc.ms_security.config;
 
+import com.uc.ms_security.authorization.DynamicAuthorizationManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,8 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final DynamicAuthorizationManager dynamicAuthorizationManager;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -99,11 +102,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users/me", "/api/users/me/profile").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/users/me", "/api/users/me/profile").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/users/me/2fa").authenticated()
-                        .requestMatchers("/api/users/**").authenticated()
-                        .requestMatchers("/api/roles/**").authenticated()
-                        .requestMatchers("/api/permissions/**").authenticated()
-                        .requestMatchers("/api/user-roles/**").authenticated()
-                        .requestMatchers("/api/role-permissions/**").authenticated()
+                        .requestMatchers(
+                                "/api/users/**",
+                                "/api/roles/**",
+                                "/api/permissions/**",
+                                "/api/user-roles/**",
+                                "/api/role-permissions/**"
+                        ).access(dynamicAuthorizationManager)
+                        .anyRequest().denyAll()
                 )
                 .oauth2ResourceServer(resourceServer ->
                         resourceServer.jwt(Customizer.withDefaults())
